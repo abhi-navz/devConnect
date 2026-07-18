@@ -30,6 +30,18 @@ const Navbar = () => {
               Home
             </Link>
             <Link
+              to="/discover"
+              className="text-text-secondary hover:text-text-primary text-sm"
+            >
+              Discover
+            </Link>
+            <Link
+              to="/connections"
+              className="text-text-secondary hover:text-text-primary text-sm"
+            >
+              Connections
+            </Link>
+            <Link
               to="/profile"
               className="text-text-secondary hover:text-text-primary text-sm"
             >

@@ -6,6 +6,7 @@ import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import connectionRoutes from './routes/connectionRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -31,6 +32,7 @@ app.get('/api/health', (req, res) => {
 // Routes will be mounted here as we build features:
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/connections', connectionRoutes);
 
 // Error handling middleware (must be last)
 app.use(notFound);
