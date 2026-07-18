@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import SkillTag from './SkillTag';
+import LikeButton from './LikeButton';
+import CommentSection from './CommentSection';
+import ConfirmDialog from './ConfirmDialog';
 
 const timeAgo = (dateString) => {
   const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
@@ -21,6 +25,15 @@ const timeAgo = (dateString) => {
 const PostCard = ({ post, onDelete }) => {
   const { user } = useAuth();
   const isOwnPost = user?._id === post.author?._id;
+  const [showComments, setShowComments] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const alreadyLiked = post.likes?.some((id) => id === user?._id);
+
+  const handleConfirmDelete = () => {
+    onDelete(post._id);
+    setConfirmOpen(false);
+  };
 
   return (
     <div className="bg-bg-secondary border border-border rounded-xl p-5">
@@ -53,7 +66,7 @@ const PostCard = ({ post, onDelete }) => {
 
         {isOwnPost && (
           <button
-            onClick={() => onDelete(post._id)}
+            onClick={() => setConfirmOpen(true)}
             className="text-text-muted hover:text-danger text-xs transition-colors"
           >
             Delete
@@ -68,12 +81,36 @@ const PostCard = ({ post, onDelete }) => {
       <p className="text-text-primary text-sm whitespace-pre-wrap mb-3">{post.content}</p>
 
       {post.tags?.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 mb-3">
           {post.tags.map((tag) => (
             <SkillTag key={tag} skill={tag} />
           ))}
         </div>
       )}
+
+      <div className="flex items-center gap-4 pt-2 border-t border-border">
+        <LikeButton
+          postId={post._id}
+          initialLiked={!!alreadyLiked}
+          initialCount={post.likes?.length || 0}
+        />
+        <button
+          onClick={() => setShowComments(!showComments)}
+          className="text-text-muted hover:text-text-secondary text-sm"
+        >
+          💬 {showComments ? 'Hide comments' : 'Comments'}
+        </button>
+      </div>
+
+      {showComments && <CommentSection postId={post._id} />}
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Delete post?"
+        message="This will permanently delete your post and all its comments. This can't be undone."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 };

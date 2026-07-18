@@ -19,11 +19,14 @@
   --color-warning: #d29922;
 
   --font-mono: 'Fira Code', 'JetBrains Mono', monospace;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;  
 }
 
 body {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
+}
+button:not(:disabled) {
+  cursor: pointer;
 }
