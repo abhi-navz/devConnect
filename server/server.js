@@ -9,6 +9,8 @@ import userRoutes from './routes/userRoutes.js';
 import connectionRoutes from './routes/connectionRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
+import projectRoutes from './routes/projectRoutes.js';
+import applicationRoutes from './routes/applicationRoutes.js';
 dotenv.config();
 connectDB();
 
@@ -36,6 +38,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/connections', connectionRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/applications', applicationRoutes);
 
 
 

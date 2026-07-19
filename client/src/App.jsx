@@ -8,6 +8,8 @@ import Profile from "./pages/Profile";
 import Discover from "./pages/Discover";
 import ViewProfile from "./pages/ViewProfile";
 import Connections from "./pages/Connections";
+import Projects from './pages/Projects';
+import ProjectDetail from './pages/ProjectDetail';
 
 function App() {
   return (
@@ -55,6 +57,22 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+  path="/projects"
+  element={
+    <ProtectedRoute>
+      <Projects />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/projects/:projectId"
+  element={
+    <ProtectedRoute>
+      <ProjectDetail />
+    </ProtectedRoute>
+  }
+/>
     </Routes>
   );
 }

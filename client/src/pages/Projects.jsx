@@ -1,0 +1,86 @@
+import { useState, useEffect } from 'react';
+import Navbar from '../components/layout/Navbar';
+import ProjectCard from '../components/common/ProjectCard';
+import CreateProjectForm from '../components/common/CreateProjectForm';
+import Button from '../components/common/Button';
+import api from '../api/axios';
+
+const Projects = () => {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [skillFilter, setSkillFilter] = useState('');
+  const [error, setError] = useState('');
+
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const params = skillFilter ? { skill: skillFilter } : {};
+      const { data } = await api.get('/projects', { params });
+      setProjects(data.projects);
+    } catch (err) {
+      setError('Failed to load projects');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(fetchProjects, 400);
+    return () => clearTimeout(timeout);
+  }, [skillFilter]);
+
+  const handleCreated = (newProject) => {
+    setProjects([newProject, ...projects]);
+    setShowForm(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-bg-primary">
+      <Navbar />
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-text-primary font-mono">Projects</h1>
+            <p className="text-text-secondary text-sm">Find a team, or recruit one.</p>
+          </div>
+          {!showForm && (
+            <Button variant="primary" onClick={() => setShowForm(true)}>
+              + Post a Project
+            </Button>
+          )}
+        </div>
+
+        {showForm && (
+          <div className="mb-6">
+            <CreateProjectForm onCreated={handleCreated} onCancel={() => setShowForm(false)} />
+          </div>
+        )}
+
+        <input
+          type="text"
+          value={skillFilter}
+          onChange={(e) => setSkillFilter(e.target.value)}
+          placeholder="Filter by skill needed (e.g. React)"
+          className="w-full sm:w-80 bg-bg-tertiary border border-border text-text-primary rounded-lg px-4 py-2.5 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent mb-6"
+        />
+
+        {error && <p className="text-danger text-sm mb-4">{error}</p>}
+
+        {loading ? (
+          <p className="text-text-secondary">Loading projects...</p>
+        ) : projects.length === 0 ? (
+          <p className="text-text-secondary">No open projects found.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {projects.map((p) => (
+              <ProjectCard key={p._id} project={p} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Projects;
