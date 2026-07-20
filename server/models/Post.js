@@ -19,6 +19,11 @@ const postSchema = new mongoose.Schema(
       default: '',
       maxlength: [100, 'Project name cannot exceed 100 characters'],
     },
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      default: null, // optional — links to an actual DevSync project if selected
+    },
     tags: {
       type: [String],
       default: [],

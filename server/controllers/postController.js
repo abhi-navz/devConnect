@@ -5,7 +5,7 @@ import Post from '../models/Post.js';
 // @access  Private
 const createPost = async (req, res, next) => {
   try {
-    const { content, projectName, tags } = req.body;
+    const { content, projectName, project, tags } = req.body;
 
     if (!content || !content.trim()) {
       res.status(400);
@@ -16,10 +16,13 @@ const createPost = async (req, res, next) => {
       author: req.user._id,
       content,
       projectName: projectName || '',
+      project: project || null,
       tags: tags || [],
     });
 
-    const populatedPost = await post.populate('author', 'name username profilePicture');
+    const populatedPost = await post
+      .populate('author', 'name username profilePicture')
+      .then((p) => p.populate('project', 'title'));
 
     res.status(201).json({ success: true, post: populatedPost });
   } catch (error) {
@@ -34,6 +37,7 @@ const getFeed = async (req, res, next) => {
   try {
     const posts = await Post.find()
       .populate('author', 'name username profilePicture')
+      .populate('project', 'title')
       .sort({ createdAt: -1 })
       .limit(100);
 

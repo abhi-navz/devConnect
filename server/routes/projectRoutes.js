@@ -4,6 +4,7 @@ import {
   getAllProjects,
   getProjectById,
   getMyProjects,
+  updateProject,
   updateProjectStatus,
   deleteProject,
 } from '../controllers/projectController.js';
@@ -17,6 +18,7 @@ router.post('/', createProject);
 router.get('/', getAllProjects);
 router.get('/mine', getMyProjects);
 router.get('/:projectId', getProjectById);
+router.put('/:projectId', updateProject);
 router.put('/:projectId/status', updateProjectStatus);
 router.delete('/:projectId', deleteProject);
 

@@ -8,9 +8,10 @@ import Profile from "./pages/Profile";
 import Discover from "./pages/Discover";
 import ViewProfile from "./pages/ViewProfile";
 import Connections from "./pages/Connections";
-import Projects from './pages/Projects';
-import ProjectDetail from './pages/ProjectDetail';
-
+import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
+import MyApplications from "./pages/MyApplications";
+import NotFound from './pages/NotFound';
 function App() {
   return (
     <Routes>
@@ -58,21 +59,29 @@ function App() {
         }
       />
       <Route
-  path="/projects"
-  element={
-    <ProtectedRoute>
-      <Projects />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/projects/:projectId"
-  element={
-    <ProtectedRoute>
-      <ProjectDetail />
-    </ProtectedRoute>
-  }
-/>
+        path="/projects"
+        element={
+          <ProtectedRoute>
+            <Projects />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/projects/:projectId"
+        element={
+          <ProtectedRoute>
+            <ProjectDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-applications"
+        element={
+          <ProtectedRoute>
+            <MyApplications />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

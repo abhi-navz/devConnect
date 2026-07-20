@@ -142,6 +142,39 @@ const deleteProject = async (req, res, next) => {
   }
 };
 
+// @desc    Update project details (owner only) — full replace of editable fields
+// @route   PUT /api/projects/:projectId
+// @access  Private
+const updateProject = async (req, res, next) => {
+  try {
+    const project = await Project.findById(req.params.projectId);
+
+    if (!project) {
+      res.status(404);
+      throw new Error('Project not found');
+    }
+
+    if (project.owner.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorized to edit this project');
+    }
+
+    const { title, description, techStack, rolesNeeded } = req.body;
+
+    if (title !== undefined) project.title = title;
+    if (description !== undefined) project.description = description;
+    if (techStack !== undefined) project.techStack = techStack;
+    if (rolesNeeded !== undefined) project.rolesNeeded = rolesNeeded;
+
+    const updated = await project.save();
+    const populated = await updated.populate('owner', 'name username profilePicture');
+
+    res.status(200).json({ success: true, project: populated });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   createProject,
   getAllProjects,
@@ -149,4 +182,5 @@ export {
   getMyProjects,
   updateProjectStatus,
   deleteProject,
+  updateProject,
 };

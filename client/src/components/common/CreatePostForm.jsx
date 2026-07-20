@@ -1,27 +1,44 @@
-import { useState } from 'react';
-import Button from './Button';
-import SkillTag from './SkillTag';
-import api from '../../api/axios';
+import { useState, useEffect } from "react";
+import Button from "./Button";
+import SkillTag from "./SkillTag";
+import api from "../../api/axios";
 
 const CreatePostForm = ({ onPostCreated }) => {
-  const [content, setContent] = useState('');
-  const [projectName, setProjectName] = useState('');
+  const [content, setContent] = useState("");
+  const [projectName, setProjectName] = useState("");
   const [tags, setTags] = useState([]);
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [myProjects, setMyProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+
+  useEffect(() => {
+    const fetchMyProjects = async () => {
+      try {
+        const { data } = await api.get("/projects/mine");
+        setMyProjects(data.projects);
+      } catch (err) {
+        // Non-critical — dropdown just stays empty if this fails
+      }
+    };
+    fetchMyProjects();
+  }, []);
 
   const handleAddTag = (e) => {
     e.preventDefault();
     const trimmed = tagInput.trim();
-    if (trimmed && !tags.some((t) => t.toLowerCase() === trimmed.toLowerCase())) {
+    if (
+      trimmed &&
+      !tags.some((t) => t.toLowerCase() === trimmed.toLowerCase())
+    ) {
       setTags([...tags, trimmed]);
     }
-    setTagInput('');
+    setTagInput("");
   };
 
   const handleTagKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === "Enter" || e.key === ",") {
       handleAddTag(e);
     }
   };
@@ -33,19 +50,25 @@ const CreatePostForm = ({ onPostCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!content.trim()) {
-      setError('Post content cannot be empty');
+      setError("Post content cannot be empty");
       return;
     }
-    setError('');
+    setError("");
     setLoading(true);
     try {
-      const { data } = await api.post('/posts', { content, projectName, tags });
+      const { data } = await api.post("/posts", {
+        content,
+        projectName,
+        project: selectedProjectId || null,
+        tags,
+      });
       onPostCreated(data.post);
-      setContent('');
-      setProjectName('');
+      setContent("");
+      setProjectName("");
+      setSelectedProjectId("");
       setTags([]);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create post');
+      setError(err.response?.data?.message || "Failed to create post");
     } finally {
       setLoading(false);
     }
@@ -68,13 +91,35 @@ const CreatePostForm = ({ onPostCreated }) => {
       />
 
       <div className="flex flex-col sm:flex-row gap-2 mb-3">
-        <input
-          type="text"
-          value={projectName}
-          onChange={(e) => setProjectName(e.target.value)}
-          placeholder="Project name (optional)"
-          className="flex-1 bg-bg-tertiary border border-border text-text-primary rounded-lg px-4 py-2.5 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
-        />
+        <div className="flex-1">
+          {myProjects.length > 0 ? (
+            <select
+              value={selectedProjectId}
+              onChange={(e) => {
+                const id = e.target.value;
+                setSelectedProjectId(id);
+                const matched = myProjects.find((p) => p._id === id);
+                setProjectName(matched ? matched.title : "");
+              }}
+              className="w-full bg-bg-tertiary border border-border text-text-primary rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="">No project link (optional)</option>
+              {myProjects.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="Project name (optional, plain text)"
+              className="w-full bg-bg-tertiary border border-border text-text-primary rounded-lg px-4 py-2.5 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          )}
+        </div>
         <div className="flex-1 flex gap-2">
           <input
             type="text"
@@ -93,7 +138,11 @@ const CreatePostForm = ({ onPostCreated }) => {
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
           {tags.map((tag) => (
-            <SkillTag key={tag} skill={tag} onRemove={() => handleRemoveTag(tag)} />
+            <SkillTag
+              key={tag}
+              skill={tag}
+              onRemove={() => handleRemoveTag(tag)}
+            />
           ))}
         </div>
       )}
@@ -101,7 +150,7 @@ const CreatePostForm = ({ onPostCreated }) => {
       <div className="flex items-center justify-between">
         <p className="text-text-muted text-xs">{content.length}/1000</p>
         <Button type="submit" variant="primary" disabled={loading}>
-          {loading ? 'Posting...' : 'Post Update'}
+          {loading ? "Posting..." : "Post Update"}
         </Button>
       </div>
     </form>

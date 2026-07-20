@@ -17,7 +17,7 @@ const Navbar = () => {
         to={isAuthenticated ? "/home" : "/"}
         className="text-xl font-bold text-accent font-mono"
       >
-        DevConnect
+        DevSync
       </Link>
 
       <div className="flex items-center gap-4">
@@ -34,6 +34,12 @@ const Navbar = () => {
               className="text-text-secondary hover:text-text-primary text-sm"
             >
               Projects
+            </Link>
+            <Link
+              to="/my-applications"
+              className="text-text-secondary hover:text-text-primary text-sm"
+            >
+              My Applications
             </Link>
             <Link
               to="/discover"

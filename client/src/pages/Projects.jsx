@@ -6,6 +6,7 @@ import Button from '../components/common/Button';
 import api from '../api/axios';
 
 const Projects = () => {
+  const [tab, setTab] = useState('browse'); // 'browse' | 'mine'
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -14,10 +15,16 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     setLoading(true);
+    setError('');
     try {
-      const params = skillFilter ? { skill: skillFilter } : {};
-      const { data } = await api.get('/projects', { params });
-      setProjects(data.projects);
+      if (tab === 'browse') {
+        const params = skillFilter ? { skill: skillFilter } : {};
+        const { data } = await api.get('/projects', { params });
+        setProjects(data.projects);
+      } else {
+        const { data } = await api.get('/projects/mine');
+        setProjects(data.projects);
+      }
     } catch (err) {
       setError('Failed to load projects');
     } finally {
@@ -26,13 +33,17 @@ const Projects = () => {
   };
 
   useEffect(() => {
-    const timeout = setTimeout(fetchProjects, 400);
+    const timeout = setTimeout(fetchProjects, tab === 'browse' ? 400 : 0);
     return () => clearTimeout(timeout);
-  }, [skillFilter]);
+  }, [skillFilter, tab]);
 
   const handleCreated = (newProject) => {
-    setProjects([newProject, ...projects]);
     setShowForm(false);
+    if (tab === 'mine') {
+      setProjects([newProject, ...projects]);
+    } else {
+      fetchProjects();
+    }
   };
 
   return (
@@ -57,20 +68,47 @@ const Projects = () => {
           </div>
         )}
 
-        <input
-          type="text"
-          value={skillFilter}
-          onChange={(e) => setSkillFilter(e.target.value)}
-          placeholder="Filter by skill needed (e.g. React)"
-          className="w-full sm:w-80 bg-bg-tertiary border border-border text-text-primary rounded-lg px-4 py-2.5 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent mb-6"
-        />
+        <div className="flex gap-2 mb-6 border-b border-border">
+          <button
+            onClick={() => setTab('browse')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              tab === 'browse'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            Browse
+          </button>
+          <button
+            onClick={() => setTab('mine')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              tab === 'mine'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            My Projects
+          </button>
+        </div>
+
+        {tab === 'browse' && (
+          <input
+            type="text"
+            value={skillFilter}
+            onChange={(e) => setSkillFilter(e.target.value)}
+            placeholder="Filter by skill needed (e.g. React)"
+            className="w-full sm:w-80 bg-bg-tertiary border border-border text-text-primary rounded-lg px-4 py-2.5 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent mb-6"
+          />
+        )}
 
         {error && <p className="text-danger text-sm mb-4">{error}</p>}
 
         {loading ? (
           <p className="text-text-secondary">Loading projects...</p>
         ) : projects.length === 0 ? (
-          <p className="text-text-secondary">No open projects found.</p>
+          <p className="text-text-secondary">
+            {tab === 'browse' ? 'No open projects found.' : "You haven't posted any projects yet."}
+          </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {projects.map((p) => (
