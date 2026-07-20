@@ -11,7 +11,7 @@ import Connections from "./pages/Connections";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import MyApplications from "./pages/MyApplications";
-import NotFound from './pages/NotFound';
+import NotFound from "./pages/NotFound";
 function App() {
   return (
     <Routes>
@@ -82,6 +82,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

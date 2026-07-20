@@ -43,7 +43,7 @@ const Home = () => {
     <div className="min-h-screen bg-bg-primary">
       <Navbar />
       <div className="max-w-2xl mx-auto px-6 py-12">
-        <h1 className="text-2xl font-bold text-text-primary mb-6 font-mono">Dev Feed</h1>
+        <h1 className="text-2xl font-bold text-text-primary mb-6 font-mono">Feed</h1>
 
         <CreatePostForm onPostCreated={handlePostCreated} />
 

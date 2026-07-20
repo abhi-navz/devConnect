@@ -77,7 +77,7 @@ const ApplicantsList = ({ projectId, onRoleFilled }) => {
             key={app._id}
             className="bg-bg-tertiary border border-border rounded-lg p-4"
           >
-            <div className="flex items-start justify-between mb-2">
+            <div className="flex flex-wrap items-start justify-between mb-2">
               <Link to={`/developers/${app.applicant?.username}`} className="flex items-center gap-3">
                 {app.applicant?.profilePicture ? (
                   <img
