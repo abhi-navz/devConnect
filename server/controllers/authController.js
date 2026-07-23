@@ -1,5 +1,5 @@
-import User from '../models/User.js';
-import generateToken from '../utils/generateToken.js';
+import User from "../models/User.js";
+import generateToken from "../utils/generateToken.js";
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -10,14 +10,16 @@ const registerUser = async (req, res, next) => {
 
     if (!name || !username || !email || !password) {
       res.status(400);
-      throw new Error('Please provide all required fields');
+      throw new Error("Please provide all required fields");
     }
 
     const userExists = await User.findOne({ $or: [{ email }, { username }] });
     if (userExists) {
       res.status(400);
       throw new Error(
-        userExists.email === email ? 'Email already registered' : 'Username already taken'
+        userExists.email === email
+          ? "Email already registered"
+          : "Username already taken"
       );
     }
 
@@ -54,15 +56,15 @@ const loginUser = async (req, res, next) => {
 
     if (!email || !password) {
       res.status(400);
-      throw new Error('Please provide email and password');
+      throw new Error("Please provide email and password");
     }
 
     // Explicitly include password since schema excludes it by default
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user || !(await user.matchPassword(password))) {
       res.status(401);
-      throw new Error('Invalid email or password');
+      throw new Error("Invalid email or password");
     }
 
     generateToken(res, user._id);
@@ -91,11 +93,13 @@ const loginUser = async (req, res, next) => {
 // @route   POST /api/auth/logout
 // @access  Private
 const logoutUser = (req, res) => {
-  res.cookie('token', '', {
+  res.cookie("token", "", {
     httpOnly: true,
     expires: new Date(0),
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
   });
-  res.status(200).json({ success: true, message: 'Logged out successfully' });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
 // @desc    Get currently logged-in user (used for persistent login on app load)
