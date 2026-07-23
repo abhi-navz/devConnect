@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import Button from '../common/Button';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import Button from "../common/Button";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const { isAuthenticated, logout, user } = useAuth();
@@ -9,25 +10,35 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
-    await logout();
-    setMenuOpen(false);
-    navigate('/login');
+    try {
+      await logout();
+
+      toast.success("Logged out successfully!");
+
+      setMenuOpen(false);
+
+      setTimeout(() => {
+        navigate("/");
+      }, 700);
+    } catch (error) {
+      toast.error("Logout failed");
+    }
   };
 
   const navLinks = [
-    { to: '/home', label: 'Home' },
-    { to: '/discover', label: 'Discover' },
-    { to: '/connections', label: 'Connections' },
-    { to: '/projects', label: 'Projects' },
-    { to: '/my-applications', label: 'My Applications' },
-    { to: '/profile', label: user?.username ? `@${user.username}` : 'Profile' },
+    { to: "/home", label: "Home" },
+    { to: "/discover", label: "Discover" },
+    { to: "/connections", label: "Connections" },
+    { to: "/projects", label: "Projects" },
+    { to: "/my-applications", label: "My Applications" },
+    { to: "/profile", label: user?.username ? `@${user.username}` : "Profile" },
   ];
 
   return (
     <nav className="bg-bg-secondary border-b border-border px-6 py-4 relative">
       <div className="flex items-center justify-between">
         <Link
-          to={isAuthenticated ? '/home' : '/'}
+          to={isAuthenticated ? "/home" : "/"}
           className="text-xl font-bold text-accent font-mono"
           onClick={() => setMenuOpen(false)}
         >
@@ -70,11 +81,25 @@ const Navbar = () => {
           aria-label="Toggle menu"
         >
           {menuOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M6 6L18 18M6 18L18 6" strokeLinecap="round" />
             </svg>
           ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M3 6H21M3 12H21M3 18H21" strokeLinecap="round" />
             </svg>
           )}
