@@ -1,28 +1,29 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import Navbar from '../components/layout/Navbar';
-import Button from '../components/common/Button';
-import api from '../api/axios';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import Navbar from "../components/layout/Navbar";
+import Button from "../components/common/Button";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+import api from "../api/axios";
 
 const Connections = () => {
   const [connections, setConnections] = useState([]);
   const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
   const fetchData = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const [connectionsRes, pendingRes] = await Promise.all([
-        api.get('/connections'),
-        api.get('/connections/pending'),
+        api.get("/connections"),
+        api.get("/connections/pending"),
       ]);
       setConnections(connectionsRes.data.connections);
       setPending(pendingRes.data.requests);
     } catch (err) {
-      setError('Failed to load connections');
+      setError("Failed to load connections");
     } finally {
       setLoading(false);
     }
@@ -38,7 +39,7 @@ const Connections = () => {
       await api.put(`/connections/accept/${connectionId}`);
       await fetchData();
     } catch (err) {
-      setError('Failed to accept request');
+      setError("Failed to accept request");
     } finally {
       setActionLoadingId(null);
     }
@@ -50,7 +51,7 @@ const Connections = () => {
       await api.put(`/connections/reject/${connectionId}`);
       await fetchData();
     } catch (err) {
-      setError('Failed to reject request');
+      setError("Failed to reject request");
     } finally {
       setActionLoadingId(null);
     }
@@ -62,35 +63,29 @@ const Connections = () => {
       await api.delete(`/connections/${connectionId}`);
       await fetchData();
     } catch (err) {
-      setError('Failed to remove connection');
+      setError("Failed to remove connection");
     } finally {
       setActionLoadingId(null);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-bg-primary">
-        <Navbar />
-        <p className="text-text-secondary text-center mt-12">Loading...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-bg-primary">
       <Navbar />
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-2xl font-bold text-text-primary mb-6 font-mono">Connections</h1>
+        <h1 className="text-2xl font-bold text-text-primary mb-6 font-mono">
+          Connections
+        </h1>
 
-        {error && (
+        {loading && <LoadingSpinner label="Loading connections..." />}
+
+        {!loading && error && (
           <div className="bg-danger/10 border border-danger text-danger text-sm rounded-lg px-4 py-2.5 mb-6">
             {error}
           </div>
         )}
 
-        {/* Pending requests section */}
-        {pending.length > 0 && (
+        {!loading && pending.length > 0 && (
           <div className="mb-8">
             <h2 className="text-text-secondary text-sm uppercase tracking-wide mb-3">
               Pending Requests ({pending.length})
@@ -105,14 +100,32 @@ const Connections = () => {
                     to={`/developers/${req.requester.username}`}
                     className="flex items-center gap-3"
                   >
-                    <div className="w-10 h-10 rounded-full bg-bg-tertiary border border-border flex items-center justify-center text-accent font-bold">
+                    {req.requester.profilePicture ? (
+                      <img
+                        src={req.requester.profilePicture}
+                        alt={req.requester.name}
+                        className="w-10 h-10 rounded-full object-cover border border-border"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          e.target.nextSibling.style.display = "flex";
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="w-10 h-10 rounded-full bg-bg-tertiary border border-border items-center justify-center text-accent font-bold"
+                      style={{
+                        display: req.requester.profilePicture ? "none" : "flex",
+                      }}
+                    >
                       {req.requester.name?.[0]?.toUpperCase()}
                     </div>
                     <div>
                       <p className="text-text-primary text-sm font-medium">
                         {req.requester.name}
                       </p>
-                      <p className="text-text-secondary text-xs">@{req.requester.username}</p>
+                      <p className="text-text-secondary text-xs">
+                        @{req.requester.username}
+                      </p>
                     </div>
                   </Link>
                   <div className="flex gap-2">
@@ -137,50 +150,74 @@ const Connections = () => {
           </div>
         )}
 
-        {/* Accepted connections section */}
-        <div>
-          <h2 className="text-text-secondary text-sm uppercase tracking-wide mb-3">
-            Your Connections ({connections.length})
-          </h2>
-          {connections.length === 0 ? (
-            <p className="text-text-secondary text-sm">
-              No connections yet. Head to{' '}
-              <Link to="/discover" className="text-accent hover:text-accent-hover">
-                Discover
-              </Link>{' '}
-              to find developers.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {connections.map((conn) => (
-                <div
-                  key={conn.connectionId}
-                  className="bg-bg-secondary border border-border rounded-xl p-4 flex items-center justify-between"
+        {!loading && (
+          <div>
+            <h2 className="text-text-secondary text-sm uppercase tracking-wide mb-3">
+              Your Connections ({connections.length})
+            </h2>
+            {connections.length === 0 ? (
+              <p className="text-text-secondary text-sm">
+                No connections yet. Head to{" "}
+                <Link
+                  to="/discover"
+                  className="text-accent hover:text-accent-hover"
                 >
-                  <Link
-                    to={`/developers/${conn.user.username}`}
-                    className="flex items-center gap-3"
+                  Discover
+                </Link>{" "}
+                to find developers.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {connections.map((conn) => (
+                  <div
+                    key={conn.connectionId}
+                    className="bg-bg-secondary border border-border rounded-xl p-4 flex items-center justify-between"
                   >
-                    <div className="w-10 h-10 rounded-full bg-bg-tertiary border border-border flex items-center justify-center text-accent font-bold">
-                      {conn.user.name?.[0]?.toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-text-primary text-sm font-medium">{conn.user.name}</p>
-                      <p className="text-text-secondary text-xs">@{conn.user.username}</p>
-                    </div>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleRemove(conn.connectionId)}
-                    disabled={actionLoadingId === conn.connectionId}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                    <Link
+                      to={`/developers/${conn.user.username}`}
+                      className="flex items-center gap-3"
+                    >
+                      {conn.user.profilePicture ? (
+                        <img
+                          src={conn.user.profilePicture}
+                          alt={conn.user.name}
+                          className="w-10 h-10 rounded-full object-cover border border-border"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.nextSibling.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className="w-10 h-10 rounded-full bg-bg-tertiary border border-border items-center justify-center text-accent font-bold"
+                        style={{
+                          display: conn.user.profilePicture ? "none" : "flex",
+                        }}
+                      >
+                        {conn.user.name?.[0]?.toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-text-primary text-sm font-medium">
+                          {conn.user.name}
+                        </p>
+                        <p className="text-text-secondary text-xs">
+                          @{conn.user.username}
+                        </p>
+                      </div>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleRemove(conn.connectionId)}
+                      disabled={actionLoadingId === conn.connectionId}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Navbar from '../components/layout/Navbar';
 import UserCard from '../components/common/UserCard';
 import api from '../api/axios';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const Discover = () => {
   const [users, setUsers] = useState([]);
@@ -70,9 +71,9 @@ const Discover = () => {
         )}
 
         {loading ? (
-          <p className="text-text-secondary">Loading developers...</p>
+          <LoadingSpinner label="Finding developers..." />
         ) : users.length === 0 ? (
-          <p className="text-text-secondary">No developers found. Try a different search.</p>
+          <p className="text-text-secondary">No developers matched that search. Try a broader term or a different skill.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {users.map((u) => (

@@ -7,7 +7,7 @@ const ProjectCard = ({ project }) => {
   return (
     <Link
       to={`/projects/${project._id}`}
-      className="block bg-bg-secondary border border-border rounded-xl p-5 hover:border-accent transition-colors"
+      className="block bg-bg-secondary border border-border rounded-xl p-5 hover:border-accent hover:-translate-y-0.5 transition-all duration-150"
     >
       <div className="flex items-start justify-between mb-2">
         <h3 className="text-text-primary font-semibold">{project.title}</h3>

@@ -5,6 +5,7 @@ import Button from "../components/common/Button";
 import SkillTag from "../components/common/SkillTag";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
+import AIGenerateButton from "../components/common/AIGenerateButton";
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
@@ -132,9 +133,17 @@ const Profile = () => {
           {isEditing ? (
             <form onSubmit={handleSave}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                  Bio
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-medium text-text-secondary">
+                    Bio
+                  </label>
+                  <AIGenerateButton
+                    type="bio"
+                    onGenerated={(text) =>
+                      setFormData({ ...formData, bio: text })
+                    }
+                  />
+                </div>
                 <textarea
                   name="bio"
                   value={formData.bio}
@@ -260,9 +269,18 @@ const Profile = () => {
                   <h3 className="text-text-muted text-xs uppercase tracking-wide mb-1">
                     GitHub
                   </h3>
-                  <p className="text-text-primary text-sm">
-                    {user?.githubUsername ? `@${user.githubUsername}` : "—"}
-                  </p>
+                  {user?.githubUsername ? (
+                    <a
+                      href={`https://github.com/${user.githubUsername}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent hover:text-accent-hover text-sm"
+                    >
+                      @{user.githubUsername}
+                    </a>
+                  ) : (
+                    <p className="text-text-primary text-sm">—</p>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-text-muted text-xs uppercase tracking-wide mb-1">

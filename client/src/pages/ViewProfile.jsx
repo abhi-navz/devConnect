@@ -4,6 +4,7 @@ import Navbar from "../components/layout/Navbar";
 import SkillTag from "../components/common/SkillTag";
 import api from "../api/axios";
 import ConnectButton from "../components/common/ConnectButton";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const ViewProfile = () => {
   const { username } = useParams();
@@ -31,9 +32,7 @@ const ViewProfile = () => {
     return (
       <div className="min-h-screen bg-bg-primary">
         <Navbar />
-        <p className="text-text-secondary text-center mt-12">
-          Loading profile...
-        </p>
+        <LoadingSpinner label="Loading profile..." />
       </div>
     );
   }
@@ -120,9 +119,18 @@ const ViewProfile = () => {
                 <h3 className="text-text-muted text-xs uppercase tracking-wide mb-1">
                   GitHub
                 </h3>
-                <p className="text-text-primary text-sm">
-                  {profile?.githubUsername ? `@${profile.githubUsername}` : "—"}
-                </p>
+                {profile?.githubUsername ? (
+                  <a
+                    href={`https://github.com/${profile.githubUsername}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:text-accent-hover text-sm"
+                  >
+                    @{profile.githubUsername}
+                  </a>
+                ) : (
+                  <p className="text-text-primary text-sm">—</p>
+                )}
               </div>
               <div>
                 <h3 className="text-text-muted text-xs uppercase tracking-wide mb-1">

@@ -3,6 +3,7 @@ import Navbar from '../components/layout/Navbar';
 import CreatePostForm from '../components/common/CreatePostForm';
 import PostCard from '../components/common/PostCard';
 import api from '../api/axios';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -54,10 +55,10 @@ const Home = () => {
         )}
 
         {loading ? (
-          <p className="text-text-secondary">Loading feed...</p>
+          <LoadingSpinner label="Loading feed...." />
         ) : posts.length === 0 ? (
           <p className="text-text-secondary text-center py-12">
-            No posts yet. Be the first to share what you're building!
+            Your feed is empty. Share what you're building — it's the fastest way to get noticed.
           </p>
         ) : (
           <div className="space-y-4">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import api from '../api/axios';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const statusBadge = (status) => {
   const styles = {
@@ -40,7 +41,7 @@ const MyApplications = () => {
         {error && <p className="text-danger text-sm mb-4">{error}</p>}
 
         {loading ? (
-          <p className="text-text-secondary">Loading...</p>
+          <LoadingSpinner label="Finding ur applications..." />
         ) : applications.length === 0 ? (
           <p className="text-text-secondary">
             You haven't applied to any projects yet.{' '}

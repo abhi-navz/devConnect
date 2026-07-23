@@ -1,21 +1,23 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import Navbar from '../components/layout/Navbar';
-import Button from '../components/common/Button';
-import SkillTag from '../components/common/SkillTag';
-import ApplicantsList from '../components/common/ApplicantsList';
-import CreateProjectForm from '../components/common/CreateProjectForm';
-import { useAuth } from '../context/AuthContext';
-import api from '../api/axios';
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import Navbar from "../components/layout/Navbar";
+import Button from "../components/common/Button";
+import SkillTag from "../components/common/SkillTag";
+import ApplicantsList from "../components/common/ApplicantsList";
+import CreateProjectForm from "../components/common/CreateProjectForm";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+import SuggestedDevelopers from "../components/common/SuggestedDevelopers";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
   const { user } = useAuth();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [applyingRole, setApplyingRole] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [myApplications, setMyApplications] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -27,7 +29,7 @@ const ProjectDetail = () => {
       const { data } = await api.get(`/projects/${projectId}`);
       setProject(data.project);
     } catch (err) {
-      setError('Project not found');
+      setError("Project not found");
     } finally {
       setLoading(false);
     }
@@ -35,8 +37,10 @@ const ProjectDetail = () => {
 
   const fetchMyApplications = async () => {
     try {
-      const { data } = await api.get('/applications/mine');
-      setMyApplications(data.applications.filter((a) => a.project?._id === projectId));
+      const { data } = await api.get("/applications/mine");
+      setMyApplications(
+        data.applications.filter((a) => a.project?._id === projectId)
+      );
     } catch (err) {
       // Non-critical — if this fails, Apply buttons just won't show status; not worth blocking the page
     }
@@ -49,16 +53,28 @@ const ProjectDetail = () => {
 
   const handleApply = async (roleId) => {
     setSubmitting(true);
-    setError('');
+    setError("");
     try {
-      await api.post('/applications', { projectId, roleId, message });
+      await api.post("/applications", { projectId, roleId, message });
       await fetchMyApplications();
       setApplyingRole(null);
-      setMessage('');
+      setMessage("");
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to apply');
+      setError(err.response?.data?.message || "Failed to apply");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleToggleStatus = async () => {
+    const newStatus = project.status === "open" ? "closed" : "open";
+    try {
+      const { data } = await api.put(`/projects/${projectId}/status`, {
+        status: newStatus,
+      });
+      setProject(data.project);
+    } catch (err) {
+      setError("Failed to update project status");
     }
   };
 
@@ -66,7 +82,7 @@ const ProjectDetail = () => {
     return (
       <div className="min-h-screen bg-bg-primary">
         <Navbar />
-        <p className="text-text-secondary text-center mt-12">Loading project...</p>
+        <LoadingSpinner label="Loading project....." />
       </div>
     );
   }
@@ -93,21 +109,33 @@ const ProjectDetail = () => {
       <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="bg-bg-secondary border border-border rounded-xl p-6">
           <div className="flex items-start justify-between mb-2">
-            <h1 className="text-xl font-bold text-text-primary">{project.title}</h1>
+            <h1 className="text-xl font-bold text-text-primary">
+              {project.title}
+            </h1>
             <div className="flex items-center gap-2">
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${
-                  project.status === 'open'
-                    ? 'bg-success/10 text-success'
-                    : 'bg-text-muted/10 text-text-muted'
+                  project.status === "open"
+                    ? "bg-success/10 text-success"
+                    : "bg-text-muted/10 text-text-muted"
                 }`}
               >
                 {project.status}
               </span>
               {isOwner && !isEditing && (
-                <Button variant="secondary" onClick={() => setIsEditing(true)}>
-                  Edit
-                </Button>
+                <>
+                  <Button variant="ghost" onClick={handleToggleStatus}>
+                    {project.status === "open"
+                      ? "Close Project"
+                      : "Reopen Project"}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -149,16 +177,22 @@ const ProjectDetail = () => {
               </h3>
               <div className="space-y-3">
                 {project.rolesNeeded?.map((role) => {
-                  const myApplication = myApplications.find((a) => a.roleId === role._id);
+                  const myApplication = myApplications.find(
+                    (a) => a.roleId === role._id
+                  );
                   return (
                     <div
                       key={role._id}
                       className="bg-bg-tertiary border border-border rounded-lg p-4"
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-text-primary text-sm font-medium">{role.roleName}</p>
+                        <p className="text-text-primary text-sm font-medium">
+                          {role.roleName}
+                        </p>
                         {role.filled && (
-                          <span className="text-text-muted text-xs">Filled</span>
+                          <span className="text-text-muted text-xs">
+                            Filled
+                          </span>
                         )}
                       </div>
                       {role.skillsRequired?.length > 0 && (
@@ -169,21 +203,34 @@ const ProjectDetail = () => {
                         </div>
                       )}
 
-                      {!isOwner && project.status === 'open' && (
+                      {isOwner &&
+                        !role.filled &&
+                        role.skillsRequired?.length > 0 && (
+                          <SuggestedDevelopers
+                            projectId={projectId}
+                            roleId={role._id}
+                            roleName={role.roleName}
+                          />
+                        )}
+
+                      {!isOwner && project.status === "open" && (
                         <>
                           {myApplication ? (
                             <p
                               className={`text-xs mt-1 ${
-                                myApplication.status === 'accepted'
-                                  ? 'text-success'
-                                  : myApplication.status === 'rejected'
-                                  ? 'text-danger'
-                                  : 'text-warning'
+                                myApplication.status === "accepted"
+                                  ? "text-success"
+                                  : myApplication.status === "rejected"
+                                  ? "text-danger"
+                                  : "text-warning"
                               }`}
                             >
-                              {myApplication.status === 'pending' && '⏳ Application pending'}
-                              {myApplication.status === 'accepted' && '✓ You were accepted!'}
-                              {myApplication.status === 'rejected' && '✗ Application rejected'}
+                              {myApplication.status === "pending" &&
+                                "⏳ Application pending"}
+                              {myApplication.status === "accepted" &&
+                                "✓ You were accepted!"}
+                              {myApplication.status === "rejected" &&
+                                "✗ Application rejected"}
                             </p>
                           ) : role.filled ? null : applyingRole === role._id ? (
                             <div className="mt-2">
@@ -200,15 +247,23 @@ const ProjectDetail = () => {
                                   onClick={() => handleApply(role._id)}
                                   disabled={submitting}
                                 >
-                                  {submitting ? 'Sending...' : 'Send Application'}
+                                  {submitting
+                                    ? "Sending..."
+                                    : "Send Application"}
                                 </Button>
-                                <Button variant="ghost" onClick={() => setApplyingRole(null)}>
+                                <Button
+                                  variant="ghost"
+                                  onClick={() => setApplyingRole(null)}
+                                >
                                   Cancel
                                 </Button>
                               </div>
                             </div>
                           ) : (
-                            <Button variant="secondary" onClick={() => setApplyingRole(role._id)}>
+                            <Button
+                              variant="secondary"
+                              onClick={() => setApplyingRole(role._id)}
+                            >
                               Apply
                             </Button>
                           )}
@@ -225,10 +280,13 @@ const ProjectDetail = () => {
                     onClick={() => setShowApplicants(!showApplicants)}
                     className="text-accent text-sm hover:text-accent-hover mb-4"
                   >
-                    {showApplicants ? 'Hide Applicants' : 'View Applicants'}
+                    {showApplicants ? "Hide Applicants" : "View Applicants"}
                   </button>
                   {showApplicants && (
-                    <ApplicantsList projectId={projectId} onRoleFilled={fetchProject} />
+                    <ApplicantsList
+                      projectId={projectId}
+                      onRoleFilled={fetchProject}
+                    />
                   )}
                 </div>
               )}

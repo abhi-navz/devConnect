@@ -1,15 +1,18 @@
-import { useState } from 'react';
-import Button from './Button';
-import SkillTag from './SkillTag';
-import api from '../../api/axios';
+import { useState } from "react";
+import Button from "./Button";
+import SkillTag from "./SkillTag";
+import api from "../../api/axios";
+import AIGenerateButton from "./AIGenerateButton";
 
 const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
   const isEditMode = !!existingProject;
 
-  const [title, setTitle] = useState(existingProject?.title || '');
-  const [description, setDescription] = useState(existingProject?.description || '');
+  const [title, setTitle] = useState(existingProject?.title || "");
+  const [description, setDescription] = useState(
+    existingProject?.description || ""
+  );
   const [techStack, setTechStack] = useState(existingProject?.techStack || []);
-  const [techInput, setTechInput] = useState('');
+  const [techInput, setTechInput] = useState("");
   const [roles, setRoles] = useState(
     existingProject?.rolesNeeded?.length
       ? existingProject.rolesNeeded.map((r) => ({
@@ -18,18 +21,21 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
           skillsRequired: r.skillsRequired || [],
           filled: r.filled,
         }))
-      : [{ roleName: '', skillsRequired: [] }]
+      : [{ roleName: "", skillsRequired: [] }]
   );
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleAddTech = (e) => {
     e.preventDefault();
     const trimmed = techInput.trim();
-    if (trimmed && !techStack.some((t) => t.toLowerCase() === trimmed.toLowerCase())) {
+    if (
+      trimmed &&
+      !techStack.some((t) => t.toLowerCase() === trimmed.toLowerCase())
+    ) {
       setTechStack([...techStack, trimmed]);
     }
-    setTechInput('');
+    setTechInput("");
   };
 
   const handleRoleChange = (index, field, value) => {
@@ -42,14 +48,18 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
     const trimmed = skillValue.trim();
     if (!trimmed) return;
     const updated = [...roles];
-    if (!updated[index].skillsRequired.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
+    if (
+      !updated[index].skillsRequired.some(
+        (s) => s.toLowerCase() === trimmed.toLowerCase()
+      )
+    ) {
       updated[index].skillsRequired.push(trimmed);
       setRoles(updated);
     }
   };
 
   const addRoleField = () => {
-    setRoles([...roles, { roleName: '', skillsRequired: [] }]);
+    setRoles([...roles, { roleName: "", skillsRequired: [] }]);
   };
 
   const removeRoleField = (index) => {
@@ -59,16 +69,16 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) {
-      setError('Title and description are required');
+      setError("Title and description are required");
       return;
     }
     const validRoles = roles.filter((r) => r.roleName.trim());
     if (validRoles.length === 0) {
-      setError('Add at least one role you need teammates for');
+      setError("Add at least one role you need teammates for");
       return;
     }
 
-    setError('');
+    setError("");
     setLoading(true);
     try {
       if (isEditMode) {
@@ -80,7 +90,7 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
         });
         onCreated(data.project);
       } else {
-        const { data } = await api.post('/projects', {
+        const { data } = await api.post("/projects", {
           title,
           description,
           techStack,
@@ -89,7 +99,10 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
         onCreated(data.project);
       }
     } catch (err) {
-      setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} project`);
+      setError(
+        err.response?.data?.message ||
+          `Failed to ${isEditMode ? "update" : "create"} project`
+      );
     } finally {
       setLoading(false);
     }
@@ -99,14 +112,14 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
     <form
       onSubmit={handleSubmit}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+        if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") {
           e.preventDefault();
         }
       }}
       className="bg-bg-secondary border border-border rounded-xl p-6"
     >
       <h2 className="text-lg font-bold text-text-primary mb-4 font-mono">
-        {isEditMode ? 'Edit Project' : 'Post a Project'}
+        {isEditMode ? "Edit Project" : "Post a Project"}
       </h2>
 
       {error && <p className="text-danger text-sm mb-3">{error}</p>}
@@ -125,9 +138,15 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium text-text-secondary mb-1.5">
-          Description
-        </label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-sm font-medium text-text-secondary">
+            Description
+          </label>
+          <AIGenerateButton
+            type="projectDescription"
+            onGenerated={(text) => setDescription(text)}
+          />
+        </div>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -147,7 +166,9 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
             type="text"
             value={techInput}
             onChange={(e) => setTechInput(e.target.value)}
-            onKeyDown={(e) => (e.key === 'Enter' || e.key === ',') && handleAddTech(e)}
+            onKeyDown={(e) =>
+              (e.key === "Enter" || e.key === ",") && handleAddTech(e)
+            }
             placeholder="e.g. React (Enter to add)"
             className="flex-1 bg-bg-tertiary border border-border text-text-primary rounded-lg px-4 py-2.5 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
           />
@@ -171,12 +192,17 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
           Roles Needed
         </label>
         {roles.map((role, index) => (
-          <div key={role._id || index} className="bg-bg-tertiary border border-border rounded-lg p-3 mb-2">
+          <div
+            key={role._id || index}
+            className="bg-bg-tertiary border border-border rounded-lg p-3 mb-2"
+          >
             <div className="flex gap-2 mb-2 items-center">
               <input
                 type="text"
                 value={role.roleName}
-                onChange={(e) => handleRoleChange(index, 'roleName', e.target.value)}
+                onChange={(e) =>
+                  handleRoleChange(index, "roleName", e.target.value)
+                }
                 placeholder="Role name (e.g. Frontend Developer)"
                 className="flex-1 bg-bg-primary border border-border text-text-primary text-sm rounded-lg px-3 py-2 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
               />
@@ -198,18 +224,18 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
               placeholder="Skills required, comma separated (e.g. React, Tailwind)"
               className="w-full bg-bg-primary border border-border text-text-primary text-sm rounded-lg px-3 py-2 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent mb-1.5"
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                   e.target.blur();
                 }
               }}
               onBlur={(e) => {
                 e.target.value
-                  .split(',')
+                  .split(",")
                   .map((s) => s.trim())
                   .filter(Boolean)
                   .forEach((skill) => handleRoleSkillAdd(index, skill));
-                e.target.value = '';
+                e.target.value = "";
               }}
             />
             {role.skillsRequired.length > 0 && (
@@ -220,9 +246,9 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
                     skill={s}
                     onRemove={() => {
                       const updated = [...roles];
-                      updated[index].skillsRequired = updated[index].skillsRequired.filter(
-                        (sk) => sk !== s
-                      );
+                      updated[index].skillsRequired = updated[
+                        index
+                      ].skillsRequired.filter((sk) => sk !== s);
                       setRoles(updated);
                     }}
                   />
@@ -242,7 +268,13 @@ const CreateProjectForm = ({ onCreated, onCancel, existingProject = null }) => {
 
       <div className="flex gap-3">
         <Button type="submit" variant="primary" disabled={loading}>
-          {loading ? (isEditMode ? 'Saving...' : 'Posting...') : isEditMode ? 'Save Changes' : 'Post Project'}
+          {loading
+            ? isEditMode
+              ? "Saving..."
+              : "Posting..."
+            : isEditMode
+            ? "Save Changes"
+            : "Post Project"}
         </Button>
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel

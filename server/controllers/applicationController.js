@@ -80,7 +80,7 @@ const getApplicationsForProject = async (req, res, next) => {
     })
       .populate(
         "applicant",
-        "name username profilePicture skills githubUsername"
+        "name username profilePicture skills githubUsername email"
       )
       .sort({ createdAt: -1 });
 

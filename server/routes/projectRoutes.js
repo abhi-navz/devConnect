@@ -7,6 +7,7 @@ import {
   updateProject,
   updateProjectStatus,
   deleteProject,
+  suggestDevelopersForRole,
 } from '../controllers/projectController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -21,5 +22,6 @@ router.get('/:projectId', getProjectById);
 router.put('/:projectId', updateProject);
 router.put('/:projectId/status', updateProjectStatus);
 router.delete('/:projectId', deleteProject);
+router.get('/:projectId/suggestions/:roleId', suggestDevelopersForRole);
 
 export default router;

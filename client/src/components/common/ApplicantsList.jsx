@@ -1,14 +1,15 @@
-import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import Button from './Button';
-import SkillTag from './SkillTag';
-import api from '../../api/axios';
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import Button from "./Button";
+import SkillTag from "./SkillTag";
+import api from "../../api/axios";
+import LoadingSpinner from "./LoadingSpinner";
 
 const ApplicantsList = ({ projectId, onRoleFilled }) => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -16,7 +17,7 @@ const ApplicantsList = ({ projectId, onRoleFilled }) => {
       const { data } = await api.get(`/applications/project/${projectId}`);
       setApplications(data.applications);
     } catch (err) {
-      setError('Failed to load applicants');
+      setError("Failed to load applicants");
     } finally {
       setLoading(false);
     }
@@ -28,13 +29,13 @@ const ApplicantsList = ({ projectId, onRoleFilled }) => {
 
   const handleAccept = async (applicationId) => {
     setActionLoadingId(applicationId);
-    setError('');
+    setError("");
     try {
       await api.put(`/applications/${applicationId}/accept`);
       await fetchApplications();
       onRoleFilled?.(); // lets parent re-fetch project to reflect the now-filled role
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to accept application');
+      setError(err.response?.data?.message || "Failed to accept application");
     } finally {
       setActionLoadingId(null);
     }
@@ -42,29 +43,31 @@ const ApplicantsList = ({ projectId, onRoleFilled }) => {
 
   const handleReject = async (applicationId) => {
     setActionLoadingId(applicationId);
-    setError('');
+    setError("");
     try {
       await api.put(`/applications/${applicationId}/reject`);
       await fetchApplications();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to reject application');
+      setError(err.response?.data?.message || "Failed to reject application");
     } finally {
       setActionLoadingId(null);
     }
   };
 
-  if (loading) return <p className="text-text-secondary text-sm">Loading applicants...</p>;
+  if (loading) return <LoadingSpinner label="Loading applicants..." />;
   if (applications.length === 0)
     return <p className="text-text-secondary text-sm">No applications yet.</p>;
 
   const statusBadge = (status) => {
     const styles = {
-      pending: 'bg-warning/10 text-warning',
-      accepted: 'bg-success/10 text-success',
-      rejected: 'bg-danger/10 text-danger',
+      pending: "bg-warning/10 text-warning",
+      accepted: "bg-success/10 text-success",
+      rejected: "bg-danger/10 text-danger",
     };
     return (
-      <span className={`text-xs px-2 py-0.5 rounded-full ${styles[status]}`}>{status}</span>
+      <span className={`text-xs px-2 py-0.5 rounded-full ${styles[status]}`}>
+        {status}
+      </span>
     );
   };
 
@@ -78,26 +81,33 @@ const ApplicantsList = ({ projectId, onRoleFilled }) => {
             className="bg-bg-tertiary border border-border rounded-lg p-4"
           >
             <div className="flex flex-wrap items-start justify-between mb-2">
-              <Link to={`/developers/${app.applicant?.username}`} className="flex items-center gap-3">
+              <Link
+                to={`/developers/${app.applicant?.username}`}
+                className="flex items-center gap-3"
+              >
                 {app.applicant?.profilePicture ? (
                   <img
                     src={app.applicant.profilePicture}
                     alt={app.applicant.name}
                     className="w-9 h-9 rounded-full object-cover border border-border"
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "flex";
                     }}
                   />
                 ) : null}
                 <div
                   className="w-9 h-9 rounded-full bg-bg-primary border border-border items-center justify-center text-accent text-sm font-bold"
-                  style={{ display: app.applicant?.profilePicture ? 'none' : 'flex' }}
+                  style={{
+                    display: app.applicant?.profilePicture ? "none" : "flex",
+                  }}
                 >
                   {app.applicant?.name?.[0]?.toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-text-primary text-sm font-medium">{app.applicant?.name}</p>
+                  <p className="text-text-primary text-sm font-medium">
+                    {app.applicant?.name}
+                  </p>
                   <p className="text-text-muted text-xs">
                     @{app.applicant?.username} · applying for {app.roleName}
                   </p>
@@ -115,10 +125,23 @@ const ApplicantsList = ({ projectId, onRoleFilled }) => {
             )}
 
             {app.message && (
-              <p className="text-text-secondary text-sm mb-2 italic">"{app.message}"</p>
+              <p className="text-text-secondary text-sm mb-2 italic">
+                "{app.message}"
+              </p>
             )}
 
-            {app.status === 'pending' && (
+            {app.status === "accepted" && app.applicant?.email && (
+              <a
+                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${app.applicant.email}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent hover:text-accent-hover text-xs inline-block mb-2"
+              >
+                ✉ Contact {app.applicant.name} at {app.applicant.email}
+              </a>
+            )}
+
+            {app.status === "pending" && (
               <div className="flex gap-2 mt-2">
                 <Button
                   variant="primary"
