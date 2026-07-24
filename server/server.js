@@ -45,6 +45,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/ai', aiRoutes);
 
 
+// Test Render auto deploy after GitHub repo rename
 
 // Error handling middleware (must be last)
 app.use(notFound);
