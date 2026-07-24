@@ -6,6 +6,10 @@ Built as a full-stack MVP using the MERN stack (MongoDB, Express, React, Node.js
 
 ---
 
+## 🌐 Live Demo
+[![Frontend](https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel)](https://devsync-az.vercel.app/)
+[![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?style=for-the-badge&logo=render)]( https://devsync-api-q09r.onrender.com)
+
 ## Features
 
 ### Authentication
